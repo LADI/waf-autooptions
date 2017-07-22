@@ -28,7 +28,7 @@
 
 import optparse
 import sys
-from waflib import Configure, Logs, Options
+from waflib import Configure, Logs, Options, Utils
 
 auto_options = []
 default_define = 'WITH_%s'
@@ -72,8 +72,9 @@ class AutoOption:
 
     When all checks have been made and the class has made a decision the
     result is saved in conf.env['NAME'] where 'NAME' by default is the
-    uppercase of the name argument to __init__, but it can be changed
-    with the conf_dest argument to __init__.
+    uppercase of the name argument to __init__, with hyphens replaced by
+    underscores. This default can be changed with the conf_dest argument
+    to __init__.
 
     The class will define a preprocessor symbol with the result. The
     default name is WITH_NAME, to not collide with the standard define
@@ -117,14 +118,9 @@ class AutoOption:
         self.dest = 'auto_option_' + name
 
         self.default = default
-        if conf_dest:
-            self.conf_dest = conf_dest
-        else:
-            self.conf_dest = name.upper()
-        if not define:
-            self.define = default_define % name.upper()
-        else:
-            self.define = define
+        safe_name = Utils.quote_define_name(name)
+        self.conf_dest = conf_dest or safe_name
+        self.define = define or default_define % safe_name
 
         if not style:
             style = default_style
