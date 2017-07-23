@@ -30,9 +30,12 @@ import optparse
 import sys
 from waflib import Configure, Logs, Options, Utils
 
+# A list of AutoOptions. It is local to each module, so all modules that
+# use AutoOptions need to run both opt.load and conf.load. In contrast
+# to the define and style options this does not need to and cannot be
+# declared in the OptionsContext, because it is needed both for the
+# options and the configure phase.
 auto_options = []
-default_define = 'WITH_%s'
-default_style = 'plain'
 
 class AutoOption:
     """
@@ -118,12 +121,15 @@ class AutoOption:
         self.dest = 'auto_option_' + name
 
         self.default = default
+
         safe_name = Utils.quote_define_name(name)
         self.conf_dest = conf_dest or safe_name
+
+        default_define = opt.get_auto_options_define()
         self.define = define or default_define % safe_name
 
         if not style:
-            style = default_style
+            style = opt.get_auto_options_style()
         self.style = style
 
         # plain (default):
@@ -244,6 +250,11 @@ class AutoOption:
         This function returns True on success and False on if the option
         was requested but cannot be enabled.
         """
+        # If the option has already been configured once, do not
+        # configure it again.
+        if self.enable != None:
+            return True
+
         argument = getattr(Options.options, self.dest)
         if argument == 'no':
             self.enable = False
@@ -268,6 +279,21 @@ class AutoOption:
         else:
             conf.msg(self.help, 'no', color='YELLOW')
 
+def options(opt):
+    """
+    This function declares necessary variables in the option context.
+    The reason for saving variables in the option context is to allow
+    autooptions to be loaded from modules (which will receive a new
+    instance of this module, clearing any global variables) with a
+    uniform style and default in the entire project.
+
+    Call this function through opt.load('autooptions').
+    """
+    if not hasattr(opt, 'auto_options_style'):
+        opt.auto_options_style = 'plain'
+    if not hasattr(opt, 'auto_options_define'):
+        opt.auto_options_define = 'WITH_%s'
+
 def opt(f):
     """
     Decorator: attach a new option function to Options.OptionsContext.
@@ -289,14 +315,29 @@ def add_auto_option(self, *k, **kw):
     return option
 
 @opt
+def get_auto_options_define(self):
+    """
+    This function gets the default define name. This default can be
+    changed through set_auto_optoins_define.
+    """
+    return self.auto_options_define
+
+@opt
 def set_auto_options_define(self, define):
     """
     This function sets the default define name. The default is
     "WITH_%s", where %s will be replaced with the name of the option in
     uppercase.
     """
-    global default_define
-    default_define = define
+    self.auto_options_define = define
+
+@opt
+def get_auto_options_style(self):
+    """
+    This function gets the default option style, which will be used for
+    the subsequent options.
+    """
+    return self.auto_options_style
 
 @opt
 def set_auto_options_style(self, style):
@@ -304,8 +345,7 @@ def set_auto_options_style(self, style):
     This function sets the default option style, which will be used for
     the subsequent options.
     """
-    global default_style
-    default_style = style
+    self.auto_options_style = style
 
 @opt
 def apply_auto_options_hack(self):
