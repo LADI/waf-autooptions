@@ -180,11 +180,12 @@ class AutoOption:
                     const='no',
                     default='auto')
 
-        funcs = ['check', 'check_cfg', 'find_program']
-        for fn in funcs:
-            def f(*k, fn=fn, **kw):
-                self.deps.append((fn, k, kw))
-            setattr(self, fn, f)
+    def check(self, *k, **kw):
+        self.deps.append(('check', k, kw))
+    def check_cfg(self, *k, **kw):
+        self.deps.append(('check_cfg', k, kw))
+    def find_program(self, *k, **kw):
+        self.deps.append(('find_program', k, kw))
 
     def add_function(self, func, *k, **kw):
         """
