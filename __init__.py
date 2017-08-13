@@ -86,8 +86,8 @@ class AutoOption:
     set_auto_options_define.
     """
 
-    def __init__(self, opt, name, help, default=True, conf_dest=None,
-            define=None, style=None):
+    def __init__(self, opt, name, help=None, default=True,
+            conf_dest=None, define=None, style=None):
         """
         Class initializing method.
 
@@ -113,10 +113,15 @@ class AutoOption:
         self.enable = None
 
         self.help = help
-        if default:
-            help_comment = ' (enabled by default if possible)'
+        if help:
+            if default:
+                help_comment = ' (enabled by default if possible)'
+            else:
+                help_comment = ' (disabled by default)'
+            option_help = help + help_comment
+            no_option_help = None
         else:
-            help_comment = ' (disabled by default)'
+            option_help = no_option_help = optparse.SUPPRESS_HELP
 
         self.dest = 'auto_option_' + name
 
@@ -163,7 +168,7 @@ class AutoOption:
                     action='store',
                     choices=['auto', 'no', 'yes'],
                     default='auto',
-                    help=self.help + help_comment,
+                    help=option_help,
                     metavar='no|yes')
         else:
             opt.add_option(
@@ -172,13 +177,14 @@ class AutoOption:
                     action='store_const',
                     const='yes',
                     default='auto',
-                    help=self.help + help_comment)
+                    help=option_help)
             opt.add_option(
                     self.no_option,
                     dest=self.dest,
                     action='store_const',
                     const='no',
-                    default='auto')
+                    default='auto',
+                    help=no_option_help)
 
     def check(self, *k, **kw):
         self.deps.append(('check', k, kw))
@@ -275,10 +281,11 @@ class AutoOption:
         This function displays a result summary with the help text and
         the result of the configuration.
         """
-        if self.enable:
-            conf.msg(self.help, 'yes', color='GREEN')
-        else:
-            conf.msg(self.help, 'no', color='YELLOW')
+        if self.help:
+            if self.enable:
+                conf.msg(self.help, 'yes', color='GREEN')
+            else:
+                conf.msg(self.help, 'no', color='YELLOW')
 
 def options(opt):
     """
