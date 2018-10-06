@@ -150,8 +150,6 @@ class AutoOption:
         if style in ['plain', 'yesno', 'yesno_and_hack']:
             self.no_option = '--no-' + name
             self.yes_option = '--' + name
-            if style == 'yesno_and_hack':
-                apply_hack = True
         elif style == 'enable':
             self.no_option = '--disable-' + name
             self.yes_option = '--enable-' + name
