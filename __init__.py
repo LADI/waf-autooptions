@@ -102,8 +102,8 @@ class AutoOption:
 
         # Dependencies and dependencies that are not found respectively.
         # elements of both are on the form (func, k, kw) where type
-        # is a string equal to "library", "header", "package" or
-        # "program", func is the function or function name that is used
+        # is a string equal to 'library', 'header', 'package' or
+        # 'program', func is the function or function name that is used
         # for the check and k and kw are the arguments and options to
         # give the check function.
         self.deps = []
@@ -157,7 +157,7 @@ class AutoOption:
             self.no_option = '--without-' + name
             self.yes_option = '--with-' + name
         else:
-            opt.fatal("invalid style")
+            opt.fatal('invalid style')
 
         if style in ['yesno', 'yesno_and_hack']:
             opt.add_option(
@@ -197,7 +197,7 @@ class AutoOption:
         configuration. During the configuration the function will be
         invoked with the configuration context as first argument
         followed by the arugments to this method, except for the func
-        argument. The function must print a "Checking for..." message,
+        argument. The function must print a 'Checking for...' message,
         because it is referred to if the check fails and this option is
         requested.
 
@@ -332,7 +332,7 @@ def get_auto_options_define(self):
 def set_auto_options_define(self, define):
     """
     This function sets the default define name. The default is
-    "WITH_%s", where %s will be replaced with the name of the option in
+    'WITH_%s', where %s will be replaced with the name of the option in
     uppercase.
     """
     self.auto_options_define = define
@@ -378,7 +378,7 @@ def summarize_auto_options(self):
     """
     This function prints a summary of the configuration of the auto
     options. Obviously, it must be called after
-    conf.load("autooptions").
+    conf.load('autooptions').
     """
     for option in auto_options:
         option.summarize(self)
@@ -386,7 +386,7 @@ def summarize_auto_options(self):
 def configure(conf):
     """
     This configures all auto options. Call it through
-    conf.load("autooptions").
+    conf.load('autooptions').
     """
     ok = True
     for option in auto_options:
