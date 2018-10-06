@@ -100,16 +100,14 @@ class AutoOption:
             style     the option style to use; see below for options
         """
 
-        # Dependencies and dependencies that are not found respectively.
-        # elements of both are on the form (func, k, kw) where type
-        # is a string equal to 'library', 'header', 'package' or
-        # 'program', func is the function or function name that is used
-        # for the check and k and kw are the arguments and options to
-        # give the check function.
+        # The dependencies to check for. The elements are on the form
+        # (func, k, kw) where func is the function or function name that
+        # is used for the check and k and kw are the arguments and
+        # options to give the function.
         self.deps = []
 
-        # Whether or not the option should be enabled or not. None
-        # indicates that the checks are not done yet.
+        # Whether or not the option should be enabled. None indicates
+        # that the checks have not been performed yet.
         self.enable = None
 
         self.help = help
@@ -145,7 +143,7 @@ class AutoOption:
         #  --foo[=yes] | --foo=no or --no-foo
         # enable:
         #  --enable-foo | --disble-foo
-        # wit:
+        # with:
         #  --with-foo | --without-foo
         if style in ['plain', 'yesno', 'yesno_and_hack']:
             self.no_option = '--no-' + name
@@ -208,11 +206,10 @@ class AutoOption:
 
     def _check(self, conf, required):
         """
-        This private method runs checks all dependencies.
-        It checks all dependencies (even if some dependency was not
-        found) so that the user can install all missing dependencies in
-        one go, instead of playing the infamous
-        hit-configure-hit-configure game.
+        This private method checks all dependencies. It checks all
+        dependencies (even if some dependency was not found) so that the
+        user can install all missing dependencies in one go, instead of
+        playing the infamous hit-configure-hit-configure game.
 
         This function returns True if all dependencies were found and
         False otherwise.
@@ -228,6 +225,7 @@ class AutoOption:
                 k = tuple(k)
             else:
                 func = getattr(conf, f)
+
             try:
                 func(*k, **kw)
             except conf.errors.ConfigurationError:
@@ -312,7 +310,7 @@ def opt(f):
 @opt
 def add_auto_option(self, *k, **kw):
     """
-    This function adds an AutoOptions to the options context. It takes
+    This function adds an AutoOption to the options context. It takes
     the same arguments as the initializer funtion of the AutoOptions
     class.
     """
@@ -364,8 +362,7 @@ def apply_auto_options_hack(self):
     configure phase.
     """
     for option in auto_options:
-        # With the hack the yesno options simply extend plain
-        # options.
+        # With the hack the yesno options simply extend plain options.
         if option.style == 'yesno_and_hack':
             for i in range(1, len(sys.argv)):
                 if sys.argv[i] == option.yes_option:
